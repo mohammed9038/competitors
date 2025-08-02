@@ -1,7 +1,10 @@
 async function uploadAndSubmit() {
   const btn = document.getElementById('submit');
+  
+  // Enhanced loading state
+  btn.classList.add('loading-state');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
   btn.disabled = true;
-  btn.innerText = "Submitting...";
 
   const address = document.getElementById('address').value.trim();
   const date = document.getElementById('date').value;
@@ -24,7 +27,6 @@ async function uploadAndSubmit() {
       promo: entry.querySelector('input[name="promo"]').value,
       visibility: entry.querySelector('select[name="visibility"]').value,
       facing: entry.querySelector('input[name="facing"]').value,
-      compFacing: entry.querySelector('input[name="compFacing"]').value,
       imageUrls: imageUrls
     };
   }));
@@ -44,10 +46,14 @@ async function uploadAndSubmit() {
     body: "data=" + encodeURIComponent(JSON.stringify(payload))
   });
 
-  alert("✅ Submitted successfully!");
+  // Success feedback
+  showNotification("✅ Data submitted successfully!", "success");
   resetForm();
+  
+  // Reset button state
+  btn.classList.remove('loading-state');
+  btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit Data';
   btn.disabled = false;
-  btn.innerText = "Submit";
 }
 
 async function uploadImagesToHostinger(files) {
@@ -66,7 +72,7 @@ async function uploadImagesToHostinger(files) {
 
 function resetForm() {
   document.getElementById("address").value = "";
-  document.getElementById("date").value = "";
+  document.getElementById("date").value = new Date().toISOString().split('T')[0];
   document.getElementById("salesRep").value = "";
   document.getElementById("entries").innerHTML = "";
 
@@ -74,4 +80,22 @@ function resetForm() {
   if (typeof addEntry === "function") {
     addEntry();
   }
+}
+
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+  notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+  notification.innerHTML = `
+    ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  document.body.appendChild(notification);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    if (notification && notification.parentNode) {
+      notification.remove();
+    }
+  }, 5000);
 }

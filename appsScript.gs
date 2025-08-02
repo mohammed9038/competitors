@@ -38,7 +38,6 @@ function doPost(e) {
       entry.promo,
       entry.visibility,
       entry.facing,
-      entry.compFacing,
       imageLinks.join(', ')
     ];
 
