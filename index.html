@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Market Insights</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body { background: #f6f8f9; font-family: 'Segoe UI', sans-serif; padding: 1rem; }
+    .card { margin-bottom: 1.5rem; }
+    .fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; }
+    @keyframes fadeIn { to { opacity: 1; } }
+    .entry { animation: slideInUp 0.5s ease; }
+    @keyframes slideInUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
+    .image-preview-container div { position: relative; width: 80px; height: 80px; }
+    .image-preview-container img { width: 100%; height: 100%; object-fit: cover; }
+    .image-preview-container button {
+      position: absolute; top: 2px; right: 2px;
+      padding: 0 4px; line-height: 1; font-size: 1rem;
+    }
+    button:hover { transform: scale(1.03); transition: all 0.2s ease; }
+  </style>
+</head>
+<body>
+
+  <!-- LANGUAGE SELECTOR -->
+  <div id="languageSelector" class="d-flex flex-column align-items-center justify-content-center vh-100 text-center">
+    <h2>Select Language / اختر اللغة</h2>
+    <div class="d-flex gap-3 mt-3">
+      <button class="btn btn-primary" onclick="setLanguage('en')">English</button>
+      <button class="btn btn-secondary" onclick="setLanguage('ar')">العربية</button>
+    </div>
+  </div>
+
+  <!-- MAIN FORM -->
+  <div class="container d-none" id="formContainer">
+    <h1 class="text-center mb-4">Competitor Pricing & Activities</h1>
+
+    <!-- Top‐level info -->
+    <div class="card p-3">
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <label for="address" class="form-label">Address</label>
+          <input type="text" id="address" class="form-control" required required>
+        </div>
+        <div class="col-12 col-md-4">
+          <label for="date" class="form-label">Date</label>
+          <input type="date" id="date" class="form-control" readonly required>
+        </div>
+        <div class="col-12 col-md-4">
+          <label for="salesRep" class="form-label">Sales Rep</label>
+          <select id="salesRep" class="form-select" required required>
+            <option value="" disabled selected>-- Select --</option>
+            <option>ABDULLAH IYAD AL-OBEIDI</option>
+            <option>AMJAD NAZIM HUSSEIN</option>
+            <option>AMMAR TAYSEER HASSAN</option>
+            <option>ASAAD FAYEK MAHMOUD</option>
+            <option>BALEEN OMER RASOL</option>
+            <option>MURTADA KHALID KAMIL ABBAS</option>
+            <option>MUSTAFA MAHDI JASSEM</option>
+            <option>OMER ABD ALWAHAB</option>
+            <option>OMER ALI MOHAMMED</option>
+            <option>SALAH MAHDI SALEH</option>
+            <option>WOROOD WALEED ABDULKAREEM MOHAMMED</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic entries -->
+    <div id="entries"></div>
+
+    <!-- Buttons -->
+    <div class="d-grid mb-3">
+      <button type="button" id="add-entry" class="btn btn-success">+ Add Entry</button>
+    </div>
+      <div class="row g-2 mb-4">
+        <div class="col-6">
+          <button type="button" id="preview" class="btn btn-primary w-100">Preview</button>
+        </div>
+        <div class="col-6">
+          <button type="button" id="reset" class="btn btn-outline-secondary w-100">Reset</button>
+        </div>
+      </div>
+      <div class="d-grid mb-4">
+        <button id="submit" onclick="uploadAndSubmit()" class="btn btn-success">Submit</button>
+      </div>
+    </div>
+
+  <!-- ENTRY TEMPLATE -->
+  <template id="entry-template">
+    <div class="card p-3 entry">
+      <!-- 1) Classification → Supplier → Brand → Competitor Brand -->
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Classification</label>
+          <select name="classification" class="form-select" required required>
+            <!-- overridden in JS -->
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Supplier</label>
+          <select name="supplier" class="form-select" disabled required required></select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Brand</label>
+          <select name="brand" class="form-select" disabled required required></select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Competitor Brand</label>
+          <select name="compBrand" class="form-select" disabled>
+  <option value="" selected>-- Optional --</option></select>
+        </div>
+      </div>
+
+      <!-- 2) Product Name & Product Size -->
+      <div class="row g-3 mt-2">
+        <div class="col-md-6 col-lg-4">
+          <label class="form-label">Product Name</label>
+          <input type="text" name="productName" class="form-control" required required>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <label class="form-label">Product Size</label>
+          <input type="text" name="productSize" class="form-control" required required>
+        </div>
+      </div>
+
+      <!-- 3) Activity Category → Activity → Prices -->
+      <div class="row g-3 mt-2">
+        <div class="col-md-3">
+          <label class="form-label">Activity</label>
+          <select name="activity" class="form-select" disabled required required></select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Retail Price</label>
+          <input type="number" name="price" class="form-control" required required>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Promo Price</label>
+          <input type="number" name="promo" class="form-control">
+        </div>
+      </div>
+
+      <!-- 4) Visibility → Facings → Upload -->
+      <div class="row g-3 mt-2">
+        <div class="col-md-3">
+          <label class="form-label">Visibility</label>
+          <select name="visibility" class="form-select" required required>
+            <!-- overridden in JS -->
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Facing Count</label>
+          <input type="number" name="facing" class="form-control" required required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Competitor Facing</label>
+          <input type="number" name="compFacing" class="form-control" required required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Upload Shelf Photos</label>
+          <input type="file" name="images" class="form-control images-input" accept="image/*" multiple>
+          <div class="image-preview-container d-flex flex-wrap gap-2 mt-2"></div>
+        </div>
+      </div>
+
+      <!-- Remove button -->
+      <div class="d-flex justify-content-end mt-3">
+        <button type="button" class="btn btn-outline-danger remove-entry">🗑 Remove Entry</button>
+      </div>
+    </div>
+  </template>
+
+  <!-- load your data arrays -->
+  <script src="js/competitorData.js"></script>
+  <script src="js/activityData.js"></script>
+
+  <!-- main logic with classification/visibility translation -->
+  <script>
+    const translations = {
+      en: {
+        dir: 'ltr', title: "Competitor Pricing & Activities",
+        address: "Address", date: "Date", salesRep: "Sales Rep",
+        addEntry: "+ Add Entry", preview: "Preview", reset: "Reset",
+        Remove: "🗑 Remove Entry", selectPlaceholder: "-- Select --",
+        options: {
+          classification: ["Food","Non Food"],
+          visibility: ["Shelf","Block"]
+        },
+        labels: {
+          classification: "Classification", supplier: "Supplier", brand: "Brand",
+          compBrand: "Competitor Brand", productName: "Product Name",
+          productSize: "Product Size", actCat: "Activity Category",
+          activity: "Activity", price: "Retail Price", promo: "Promo Price",
+          visibility: "Visibility", facing: "Facing Count",
+          compFacing: "Competitor Facing", images: "Upload Shelf Photos"
+        }
+      },
+      ar: {
+        dir: 'rtl', title: "رؤى السوق",
+        address: "العنوان", date: "التاريخ", salesRep: "مندوب المبيعات",
+        addEntry: "+ إضافة مدخل", preview: "معاينة", reset: "إعادة ضبط",
+        Remove: "🗑 إزالة المدخل", selectPlaceholder: "-- اختر --",
+        options: {
+         classification: ["غذائية","غير غذائية"], visibility: ["رف","بلوك"] },
+        labels: {
+          classification: "التصنيف", supplier: "المورد", brand: "العلامة التجارية",
+          compBrand: "علامة المنافس", productName: "اسم المنتج",
+          productSize: "حجم المنتج", actCat: "فئة النشاط",
+          activity: "النشاط", price: "سعر البيع", promo: "سعر العرض",
+          visibility: "مكان الظهور", facing: "عدد الواجهات",
+          compFacing: "واجهات المنافس", images: "تحميل صور"
+        }
+      }
+    };
+
+    let currentLang = 'en';
+    function setLanguage(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+      document.body.setAttribute('dir', t.dir);
+      document.body.style.textAlign = t.dir==='rtl'?'right':'left';
+      document.getElementById('languageSelector').classList.add('d-none');
+      const form = document.getElementById('formContainer');
+      form.classList.remove('d-none'); form.classList.add('fade-in');
+
+      // top‐level labels
+      document.querySelector('h1').textContent = t.title;
+      document.querySelector('label[for="address"]').textContent = t.address;
+      document.querySelector('label[for="date"]').textContent = t.date;
+      document.querySelector('label[for="salesRep"]').textContent = t.salesRep;
+      document.getElementById('add-entry').textContent = t.addEntry;
+      document.getElementById('preview').textContent   = t.preview;
+      document.getElementById('reset').textContent     = t.reset;
+
+      // translate static SalesRep placeholder
+      const repSel = document.getElementById('salesRep');
+      if(repSel&&repSel.options.length) repSel.options[0].textContent = t.selectPlaceholder;
+    }
+
+    function fillSelect(sel, arr) {
+      sel.innerHTML = `<option value="" disabled selected>${translations[currentLang].selectPlaceholder}</option>`
+                    + arr.map(v=>`<option>${v}</option>`).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // set today's date
+      document.getElementById('date').value = new Date().toISOString().split('T')[0];
+      const entriesEl = document.getElementById('entries');
+      const tmpl      = document.getElementById('entry-template').content;
+
+      function addEntry() {
+        const clone = tmpl.cloneNode(true);
+        const entry = clone.querySelector('.entry');
+        const t     = translations[currentLang];
+
+        // selects & inputs
+        const cls = entry.querySelector('select[name=classification]');
+        const sup = entry.querySelector('select[name=supplier]');
+        const br  = entry.querySelector('select[name=brand]');
+        const cb  = entry.querySelector('select[name=compBrand]');
+        const pn  = entry.querySelector('input[name=productName]');
+        const ps  = entry.querySelector('input[name=productSize]');        const act = entry.querySelector('select[name=activity]');
+        const vis = entry.querySelector('select[name=visibility]');
+        fillSelect(act, activityData.map(r => r.Activity));
+        act.disabled = false;
+
+        // 1) override classification options (value=English, text=translated)
+        cls.innerHTML = `<option value="" disabled selected>${t.selectPlaceholder}</option>`
+                      + translations.en.options.classification
+                          .map((eng,i)=>
+                             `<option value="${eng}">${t.options.classification[i]}</option>`
+                          ).join('');
+
+        // 2) override visibility options
+        vis.innerHTML = `<option value="" disabled selected>${t.selectPlaceholder}</option>`
+                      + translations.en.options.visibility
+                          .map((eng,i)=>
+                             `<option value="${eng}">${t.options.visibility[i]}</option>`
+                          ).join('');
+
+        // translate all labels in entry
+        const fieldMap = {
+          "Classification":"classification","Supplier":"supplier","Brand":"brand",
+          "Competitor Brand":"compBrand","Product Name":"productName",
+          "Product Size":"productSize","Activity Category":"actCat","Activity":"activity",
+          "Retail Price":"price","Promo Price":"promo","Visibility":"visibility",
+          "Facing Count":"facing","Competitor Facing":"compFacing",
+          "Upload Shelf Photos":"images"
+        };
+        entry.querySelectorAll('label').forEach(lbl => {
+          const key = fieldMap[lbl.textContent.trim()];
+          if(key) lbl.textContent = t.labels[key];
+        });
+
+        // populate Activity Category
+        // cascading selects
+        cls.addEventListener('change', () => {
+          fillSelect(sup,
+            [...new Set(competitorData.filter(r => r.Classification === cls.value).map(r => r.Supplier))].sort()
+          );
+          sup.disabled = false;
+          br.innerHTML = '<option value="" disabled selected>-- Select --</option>';
+          br.disabled = true;
+          cb.innerHTML = '<option value="">-- Optional --</option>';
+          cb.disabled = true;
+        });
+
+        sup.addEventListener('change', () => {
+          fillSelect(br,
+            [...new Set(competitorData.filter(r => r.Supplier === sup.value).map(r => r.Brand))].sort()
+          );
+          br.disabled = false;
+          cb.innerHTML = '<option value="">-- Optional --</option>';
+          cb.disabled = true;
+        });
+
+        br.addEventListener('change', () => {
+          const compBrands = [...new Set(competitorData
+            .filter(r => r.Supplier === sup.value && r.Brand === br.value)
+            .map(r => r["Competitor Brand"])
+          )].sort();
+          cb.innerHTML = `<option value="">-- Optional --</option>` + compBrands.map(b => `<option>${b}</option>`).join('');
+          cb.disabled = false;
+        });
+        // remove-entry
+        entry.querySelector('.remove-entry').onclick = () => entry.remove();
+        entry.querySelector('.remove-entry').textContent = t.Remove;
+
+        // multi-image preview logic
+        const imagesInput      = entry.querySelector('.images-input');
+        const previewContainer = entry.querySelector('.image-preview-container');
+        const dt = new DataTransfer();
+
+        imagesInput.addEventListener('change', () => {
+          for(const file of imagesInput.files) dt.items.add(file);
+          imagesInput.files = dt.files;
+          renderPreviews();
+        });
+        function renderPreviews() {
+          previewContainer.innerHTML = '';
+          Array.from(dt.files).forEach((file, idx) => {
+            const reader = new FileReader();
+            const wrapper= document.createElement('div');
+            const img    = document.createElement('img');
+            const btn    = document.createElement('button');
+            img.classList.add('border','rounded');
+            btn.type = 'button'; btn.innerHTML = '×';
+            btn.classList.add('btn','btn-sm','btn-danger');
+            btn.addEventListener('click', () => {
+              dt.items.remove(idx);
+              imagesInput.files = dt.files;
+              renderPreviews();
+            });
+            reader.onload = e => img.src = e.target.result;
+            reader.readAsDataURL(file);
+            wrapper.appendChild(img);
+            wrapper.appendChild(btn);
+            previewContainer.appendChild(wrapper);
+          });
+        }
+
+        entriesEl.appendChild(entry);
+      }
+
+      document.getElementById('add-entry').onclick = addEntry;
+      document.getElementById('reset').onclick     = () => location.reload();
+
+      document.getElementById('preview').onclick = () => {
+        const t = translations[currentLang];
+
+        // build mapping English→translated for preview
+        const clsMap = Object.fromEntries(
+          translations.en.options.classification.map((eng,i)=>[eng, t.options.classification[i]])
+        );
+        const visMap = Object.fromEntries(
+          translations.en.options.visibility.map((eng,i)=>[eng, t.options.visibility[i]])
+        );
+
+        const address  = document.getElementById('address').value.trim();
+        const date     = document.getElementById('date').value;
+        const salesRep = document.getElementById('salesRep').value;
+
+        const collected = Array.from(entriesEl.children).map((entry, i) => {
+          return {
+            classification: clsMap[entry.querySelector('select[name="classification"]').value] || '',
+            supplier:       entry.querySelector('select[name="supplier"]').value,
+            brand:          entry.querySelector('select[name="brand"]').value,
+            compBrand:      entry.querySelector('select[name="compBrand"]').value,
+            productName:    entry.querySelector('input[name="productName"]').value,
+            productSize:    entry.querySelector('input[name="productSize"]').value,
+            actCat:         entry.querySelector('select[name="actCat"]').value,
+            activity:       entry.querySelector('select[name="activity"]').value,
+            price:          entry.querySelector('input[name="price"]').value,
+            promo:          entry.querySelector('input[name="promo"]').value,
+            visibility:     visMap[entry.querySelector('select[name="visibility"]').value] || '',
+            facing:         entry.querySelector('input[name="facing"]').value,
+            compFacing:     entry.querySelector('input[name="compFacing"]').value,
+            images:         Array.from(entry.querySelector('input[name="images"]').files).map(f=>f.name)
+          };
+        });
+
+        // render preview
+        let html = `<div class="mt-4" id="previewContainer">
+                      <h3>${t.preview}</h3>
+                      <p><strong>${t.address}:</strong> ${address}<br/>
+                         <strong>${t.date}:</strong> ${date}<br/>
+                         <strong>${t.salesRep}:</strong> ${salesRep}</p>`;
+        collected.forEach((e, idx) => {
+          html += `<div class="card p-3 mb-2">
+                     <h5>${t.preview} Entry ${idx+1}</h5><ul>
+                       <li>${t.labels.classification}: ${e.classification}</li>
+                       <li>${t.labels.supplier}: ${e.supplier}</li>
+                       <li>${t.labels.brand}: ${e.brand}</li>
+                       <li>${t.labels.compBrand}: ${e.compBrand}</li>
+                       <li>${t.labels.productName}: ${e.productName}</li>
+                       <li>${t.labels.productSize}: ${e.productSize}</li>
+                       <li>${t.labels.activity}: ${e.activity}</li>
+                       <li>${t.labels.price}: ${e.price}</li>
+                       <li>${t.labels.promo}: ${e.promo}</li>
+                       <li>${t.labels.visibility}: ${e.visibility}</li>
+                       <li>${t.labels.facing}: ${e.facing}</li>
+                       <li>${t.labels.compFacing}: ${e.compFacing}</li>
+                       <li>${t.labels.images}: ${e.images.join(', ')}</li>
+                     </ul>
+                   </div>`;
+        });
+        html += `</div>`;
+
+        const old = document.getElementById('previewContainer');
+        if(old) old.remove();
+        document.getElementById('formContainer').insertAdjacentHTML('beforeend', html);
+        document.getElementById('previewContainer').scrollIntoView({behavior:'smooth'});
+      };
+    });
+  </script>
+  <script src="js/submit.js"></script>
+
+<script>
+function uploadAndSubmit() {
+  const requiredFields = document.querySelectorAll('#formContainer [required]');
+  let allFilled = true;
+  requiredFields.forEach(field => {
+    if (!field.value) {
+      field.classList.add('is-invalid');
+      allFilled = false;
+    } else {
+      field.classList.remove('is-invalid');
+    }
+  });
+  if (!allFilled) {
+    alert("Please fill in all required fields.");
+    return;
+  }
+
+  // Proceed with submission logic (already defined elsewhere)
+  alert("Form ready to submit! (Replace this with actual submit logic)");
+}
+</script>
+
+</body>
+</html>
