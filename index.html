@@ -434,7 +434,7 @@
 
         <!-- Action Buttons -->
         <section class="form-section">
-          <h2 class="section-header">
+          <h2 id="actions-header" class="section-header">
             <i class="fas fa-cogs"></i>
             Actions
           </h2>
@@ -694,7 +694,7 @@
       const visitHeader = document.querySelector('.form-section h2');
       if(visitHeader) visitHeader.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${t.visitInfo}`;
       
-      const actionsHeader = document.querySelector('.form-section:last-of-type h2');
+      const actionsHeader = document.getElementById('actions-header');
       if(actionsHeader) actionsHeader.innerHTML = `<i class="fas fa-cogs"></i> ${t.actions}`;
       
       // Buttons
