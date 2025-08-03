@@ -38,17 +38,26 @@ async function uploadAndSubmit() {
     entries
   };
 
-  await fetch("https://script.google.com/macros/s/AKfycbzfSWHROQG2Hx_FJtEMvnHtFgMjV8CG6ZfE5hUJ7e8HqJEOHDCzGlZ-i8Pauaj1yN7c/exec", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: "data=" + encodeURIComponent(JSON.stringify(payload))
-  });
+  try {
+    const response = await fetch("https://script.google.com/macros/s/AKfycbzfSWHROQG2Hx_FJtEMvnHtFgMjV8CG6ZfE5hUJ7e8HqJEOHDCzGlZ-i8Pauaj1yN7c/exec", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: "data=" + encodeURIComponent(JSON.stringify(payload))
+    });
 
-  // Success feedback
-  showNotification("✅ Data submitted successfully!", "success");
-  resetForm();
+    if (!response.ok) {
+      throw new Error(`Submit failed: ${response.status} ${response.statusText}`);
+    }
+
+    // Success feedback
+    showNotification("✅ Data submitted successfully!", "success");
+    resetForm();
+  } catch (error) {
+    console.error('Submit error:', error);
+    showNotification(`❌ Failed to submit data: ${error.message}`, 'error');
+  }
   
   // Reset button state
   btn.classList.remove('loading-state');
@@ -62,12 +71,22 @@ async function uploadImagesToHostinger(files) {
     formData.append(`image${i}`, file);
   });
 
-  const res = await fetch("https://www.mkalrawi.com/Competitors/upload.php", {
-    method: "POST",
-    body: formData
-  });
+  try {
+    const res = await fetch("https://www.mkalrawi.com/Competitors/upload.php", {
+      method: "POST",
+      body: formData
+    });
 
-  return await res.json(); // returns array of image URLs
+    if (!res.ok) {
+      throw new Error(`Upload failed: ${res.status} ${res.statusText}`);
+    }
+
+    return await res.json(); // returns array of image URLs
+  } catch (error) {
+    console.error('Upload error:', error);
+    showNotification(`Upload failed: ${error.message}`, 'error');
+    return []; // Return empty array as fallback
+  }
 }
 
 function resetForm() {
