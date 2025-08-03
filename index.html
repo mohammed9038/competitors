@@ -580,37 +580,75 @@
   <script>
     const translations = {
       en: {
-        dir: 'ltr', title: "Competitor Pricing & Activities",
-        address: "Address", date: "Date", salesRep: "Sales Rep",
-        addEntry: "+ Add Entry", preview: "Preview", reset: "Reset",
-        Remove: "🗑 Remove Entry", selectPlaceholder: "-- Select --",
+        dir: 'ltr', 
+        title: "Market Insights",
+        subtitle: "Competitor Pricing & Activities",
+        visitInfo: "Visit Information",
+        productEntry: "Product Entry",
+        actions: "Actions",
+        address: "Address", 
+        date: "Date", 
+        salesRep: "Sales Rep",
+        addEntry: "Add Entry", 
+        preview: "Preview", 
+        reset: "Reset",
+        submit: "Submit Data",
+        remove: "Remove Entry", 
+        selectPlaceholder: "-- Select --",
+        optionalPlaceholder: "-- Optional --",
         options: {
           classification: ["Food","Non Food"],
           visibility: ["Shelf","Block"]
         },
         labels: {
-          classification: "Classification", supplier: "Supplier", brand: "Brand",
-          compBrand: "Competitor Brand", productName: "Product Name",
-          productSize: "Product Size", actCat: "Activity Category",
-          activity: "Activity", price: "Retail Price", promo: "Promo Price",
-          visibility: "Visibility", facing: "Facing Count",
+          classification: "Classification", 
+          supplier: "Supplier", 
+          brand: "Brand",
+          compBrand: "Competitor Brand", 
+          productName: "Product Name",
+          productSize: "Product Size", 
+          activity: "Activity", 
+          price: "Retail Price", 
+          promo: "Promo Price",
+          visibility: "Visibility", 
+          facing: "Facing Count",
           images: "Upload Shelf Photos"
         }
       },
       ar: {
-        dir: 'rtl', title: "رؤى السوق",
-        address: "العنوان", date: "التاريخ", salesRep: "مندوب المبيعات",
-        addEntry: "+ إضافة مدخل", preview: "معاينة", reset: "إعادة ضبط",
-        Remove: "🗑 إزالة المدخل", selectPlaceholder: "-- اختر --",
+        dir: 'rtl', 
+        title: "رؤى السوق",
+        subtitle: "أسعار ونشاطات المنافسين",
+        visitInfo: "معلومات الزيارة",
+        productEntry: "إدخال المنتج",
+        actions: "الإجراءات",
+        address: "العنوان", 
+        date: "التاريخ", 
+        salesRep: "مندوب المبيعات",
+        addEntry: "إضافة مدخل", 
+        preview: "معاينة", 
+        reset: "إعادة ضبط",
+        submit: "إرسال البيانات",
+        remove: "إزالة المدخل", 
+        selectPlaceholder: "-- اختر --",
+        optionalPlaceholder: "-- اختياري --",
         options: {
-         classification: ["غذائية","غير غذائية"], visibility: ["رف","بلوك"] },
+         classification: ["غذائية","غير غذائية"], 
+         visibility: ["رف","بلوك"] 
+        },
         labels: {
-          classification: "التصنيف", supplier: "المورد", brand: "العلامة التجارية",
-          compBrand: "علامة المنافس", productName: "اسم المنتج",
-          productSize: "حجم المنتج", actCat: "فئة النشاط",
-          activity: "النشاط", price: "سعر البيع", promo: "سعر العرض",
-          visibility: "مكان الظهور", facing: "عدد الواجهات",
-          images: "تحميل صور"
+          classification: "التصنيف", 
+          supplier: "المورد", 
+          brand: "العلامة التجارية",
+          compBrand: "علامة المنافس", 
+          productName: "اسم المنتج",
+          productSize: "حجم المنتج", 
+          activity: "النشاط", 
+          price: "سعر البيع", 
+          promo: "سعر العرض",
+          visibility: "مكان الظهور", 
+          facing: "عدد الواجهات",
+          images: "تحميل صور الرف"
         }
       }
     };
@@ -627,12 +665,25 @@
 
       // top‐level labels
       document.querySelector('h1').textContent = t.title;
-      document.querySelector('label[for="address"]').textContent = t.address;
-      document.querySelector('label[for="date"]').textContent = t.date;
-      document.querySelector('label[for="salesRep"]').textContent = t.salesRep;
-      document.getElementById('add-entry').textContent = t.addEntry;
-      document.getElementById('preview').textContent   = t.preview;
-      document.getElementById('reset').textContent     = t.reset;
+      document.querySelector('.subtitle').textContent = t.subtitle;
+      
+      // Visit Information section
+      document.querySelector('label[for="address"]').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${t.address}`;
+      document.querySelector('label[for="date"]').innerHTML = `<i class="fas fa-calendar-alt"></i> ${t.date}`;
+      document.querySelector('label[for="salesRep"]').innerHTML = `<i class="fas fa-user-tie"></i> ${t.salesRep}`;
+      
+      // Section headers
+      const visitHeader = document.querySelector('.form-section h2');
+      if(visitHeader) visitHeader.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${t.visitInfo}`;
+      
+      const actionsHeader = document.querySelector('.form-section:last-of-type h2');
+      if(actionsHeader) actionsHeader.innerHTML = `<i class="fas fa-cogs"></i> ${t.actions}`;
+      
+      // Buttons
+      document.getElementById('add-entry').innerHTML = `<i class="fas fa-plus me-2"></i>${t.addEntry}`;
+      document.getElementById('preview').innerHTML = `<i class="fas fa-eye me-2"></i>${t.preview}`;
+      document.getElementById('reset').innerHTML = `<i class="fas fa-undo me-2"></i>${t.reset}`;
+      document.getElementById('submit').innerHTML = `<i class="fas fa-paper-plane me-2"></i>${t.submit}`;
 
       // translate static SalesRep placeholder
       const repSel = document.getElementById('salesRep');
@@ -689,18 +740,33 @@
                              `<option value="${eng}">${t.options.visibility[i]}</option>`
                           ).join('');
 
+        // translate entry header
+        const entryHeader = entry.querySelector('h2');
+        if(entryHeader) entryHeader.innerHTML = `<i class="fas fa-shopping-basket"></i> ${t.productEntry}`;
+        
         // translate all labels in entry
         const fieldMap = {
           "Classification":"classification","Supplier":"supplier","Brand":"brand",
           "Competitor Brand":"compBrand","Product Name":"productName",
-          "Product Size":"productSize","Activity Category":"actCat","Activity":"activity",
+          "Product Size":"productSize","Activity":"activity",
           "Retail Price":"price","Promo Price":"promo","Visibility":"visibility",
           "Facing Count":"facing","Upload Shelf Photos":"images"
         };
         entry.querySelectorAll('label').forEach(lbl => {
-          const key = fieldMap[lbl.textContent.trim()];
-          if(key) lbl.textContent = t.labels[key];
+          const textContent = lbl.textContent.trim();
+          const key = fieldMap[textContent];
+          if(key) {
+            const icon = lbl.querySelector('i');
+            const iconHtml = icon ? icon.outerHTML : '';
+            lbl.innerHTML = `${iconHtml} ${t.labels[key]}`;
+          }
         });
+        
+        // translate placeholders
+        const compBrandSelect = entry.querySelector('select[name="compBrand"]');
+        if(compBrandSelect && compBrandSelect.options[0]) {
+          compBrandSelect.options[0].textContent = t.optionalPlaceholder;
+        }
 
         // populate Activity Category
         // cascading selects
@@ -709,9 +775,9 @@
             [...new Set(competitorData.filter(r => r.Classification === cls.value).map(r => r.Supplier))].sort()
           );
           sup.disabled = false;
-          br.innerHTML = '<option value="" disabled selected>-- Select --</option>';
+          br.innerHTML = `<option value="" disabled selected>${translations[currentLang].selectPlaceholder}</option>`;
           br.disabled = true;
-          cb.innerHTML = '<option value="">-- Optional --</option>';
+          cb.innerHTML = `<option value="">${translations[currentLang].optionalPlaceholder}</option>`;
           cb.disabled = true;
         });
 
@@ -720,7 +786,7 @@
             [...new Set(competitorData.filter(r => r.Supplier === sup.value).map(r => r.Brand))].sort()
           );
           br.disabled = false;
-          cb.innerHTML = '<option value="">-- Optional --</option>';
+          cb.innerHTML = `<option value="">${translations[currentLang].optionalPlaceholder}</option>`;
           cb.disabled = true;
         });
 
@@ -729,12 +795,12 @@
             .filter(r => r.Supplier === sup.value && r.Brand === br.value)
             .map(r => r["Competitor Brand"])
           )].sort();
-          cb.innerHTML = `<option value="">-- Optional --</option>` + compBrands.map(b => `<option>${b}</option>`).join('');
+          cb.innerHTML = `<option value="">${translations[currentLang].optionalPlaceholder}</option>` + compBrands.map(b => `<option>${b}</option>`).join('');
           cb.disabled = false;
         });
         // remove-entry
         entry.querySelector('.remove-entry').onclick = () => entry.remove();
-        entry.querySelector('.remove-entry').textContent = t.Remove;
+        entry.querySelector('.remove-entry').innerHTML = `<i class="fas fa-trash me-2"></i>${t.remove}`;
 
         // multi-image preview logic
         const imagesInput      = entry.querySelector('.images-input');
