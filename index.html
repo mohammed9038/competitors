@@ -508,68 +508,86 @@
         </div>
       </div>
 
+      
+      <!-- 2) Product Name & Product Size -->
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-box"></i>
+            Product Name
+          </label>
+          <input type="text" name="productName" class="form-control" required>
         </div>
-        
-        <!-- 2) Product Name & Product Size -->
-        <div class="row g-3 mt-2">
-        <div class="col-md-6 col-lg-4">
-          <label class="form-label">Product Name</label>
-          <input type="text" name="productName" class="form-control" required required>
-        </div>
-        <div class="col-md-6 col-lg-4">
-          <label class="form-label">Product Size</label>
-          <input type="text" name="productSize" class="form-control" required required>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-ruler"></i>
+            Product Size
+          </label>
+          <input type="text" name="productSize" class="form-control" required>
         </div>
       </div>
 
+      <!-- 3) Activity → Prices -->
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-tasks"></i>
+            Activity
+          </label>
+          <select name="activity" class="form-select" disabled required></select>
         </div>
-        
-        <!-- 3) Activity Category → Activity → Prices -->
-        <div class="row g-3 mt-2">
-        <div class="col-md-3">
-          <label class="form-label">Activity</label>
-          <select name="activity" class="form-select" disabled required required></select>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-dollar-sign"></i>
+            Retail Price
+          </label>
+          <input type="number" name="price" class="form-control" required>
         </div>
-        <div class="col-md-2">
-          <label class="form-label">Retail Price</label>
-          <input type="number" name="price" class="form-control" required required>
-        </div>
-        <div class="col-md-2">
-          <label class="form-label">Promo Price</label>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-percentage"></i>
+            Promo Price
+          </label>
           <input type="number" name="promo" class="form-control">
         </div>
       </div>
 
-        </div>
-        
-        <!-- 4) Visibility → Facings → Upload -->
-        <div class="row g-3 mt-2">
-        <div class="col-md-3">
-          <label class="form-label">Visibility</label>
-          <select name="visibility" class="form-select" required required>
+
+      <!-- 4) Visibility → Facings → Upload -->
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-eye"></i>
+            Visibility
+          </label>
+          <select name="visibility" class="form-select" required>
             <!-- overridden in JS -->
           </select>
         </div>
-        <div class="col-md-3">
-          <label class="form-label">Facing Count</label>
-          <input type="number" name="facing" class="form-control" required required>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-layer-group"></i>
+            Facing Count
+          </label>
+          <input type="number" name="facing" class="form-control" required>
         </div>
-
-        <div class="col-md-6">
-          <label class="form-label">Upload Shelf Photos</label>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-camera"></i>
+            Upload Shelf Photos
+          </label>
           <input type="file" name="images" class="form-control images-input" accept="image/*" multiple>
           <div class="image-preview-container d-flex flex-wrap gap-2 mt-2"></div>
         </div>
       </div>
 
-        <!-- Remove button -->
-        <div class="d-flex justify-content-end mt-4">
-          <button type="button" class="btn btn-outline-danger remove-entry">
-            <i class="fas fa-trash me-2"></i>Remove Entry
-          </button>
-        </div>
+              <!-- Remove button -->
+      <div class="d-flex justify-content-end mt-4">
+        <button type="button" class="btn btn-outline-danger remove-entry">
+          <i class="fas fa-trash me-2"></i>Remove Entry
+        </button>
       </div>
-    </div>
+    </section>
   </template>
 
   <!-- load your data arrays -->
@@ -744,21 +762,27 @@
         const entryHeader = entry.querySelector('h2');
         if(entryHeader) entryHeader.innerHTML = `<i class="fas fa-shopping-basket"></i> ${t.productEntry}`;
         
-        // translate all labels in entry
-        const fieldMap = {
-          "Classification":"classification","Supplier":"supplier","Brand":"brand",
-          "Competitor Brand":"compBrand","Product Name":"productName",
-          "Product Size":"productSize","Activity":"activity",
-          "Retail Price":"price","Promo Price":"promo","Visibility":"visibility",
-          "Facing Count":"facing","Upload Shelf Photos":"images"
-        };
-        entry.querySelectorAll('label').forEach(lbl => {
-          const textContent = lbl.textContent.trim();
-          const key = fieldMap[textContent];
-          if(key) {
-            const icon = lbl.querySelector('i');
-            const iconHtml = icon ? icon.outerHTML : '';
-            lbl.innerHTML = `${iconHtml} ${t.labels[key]}`;
+        // translate all labels in entry with proper icon mapping
+        const labelMappings = [
+          { icon: 'fas fa-tag', key: 'classification' },
+          { icon: 'fas fa-building', key: 'supplier' },
+          { icon: 'fas fa-certificate', key: 'brand' },
+          { icon: 'fas fa-star', key: 'compBrand' },
+          { icon: 'fas fa-box', key: 'productName' },
+          { icon: 'fas fa-ruler', key: 'productSize' },
+          { icon: 'fas fa-tasks', key: 'activity' },
+          { icon: 'fas fa-dollar-sign', key: 'price' },
+          { icon: 'fas fa-percentage', key: 'promo' },
+          { icon: 'fas fa-eye', key: 'visibility' },
+          { icon: 'fas fa-layer-group', key: 'facing' },
+          { icon: 'fas fa-camera', key: 'images' }
+        ];
+        
+        entry.querySelectorAll('.form-group').forEach((group, index) => {
+          const label = group.querySelector('label');
+          const mapping = labelMappings[index];
+          if (label && mapping && t.labels[mapping.key]) {
+            label.innerHTML = `<i class="${mapping.icon}"></i> ${t.labels[mapping.key]}`;
           }
         });
         
