@@ -66,6 +66,11 @@ async function uploadAndSubmit() {
 }
 
 async function uploadImagesToHostinger(files) {
+  // If no files, return empty array
+  if (!files || files.length === 0) {
+    return [];
+  }
+
   const formData = new FormData();
   Array.from(files).forEach((file, i) => {
     formData.append(`image${i}`, file);
@@ -81,11 +86,21 @@ async function uploadImagesToHostinger(files) {
       throw new Error(`Upload failed: ${res.status} ${res.statusText}`);
     }
 
-    return await res.json(); // returns array of image URLs
+    const result = await res.json();
+    showNotification(`✅ ${files.length} image(s) uploaded successfully!`, 'success');
+    return result; // returns array of image URLs
   } catch (error) {
     console.error('Upload error:', error);
-    showNotification(`Upload failed: ${error.message}`, 'error');
-    return []; // Return empty array as fallback
+    
+    // Check if it's a CORS error
+    if (error.message.includes('fetch')) {
+      showNotification(`⚠️ Image upload blocked by CORS policy. Data will be submitted without images.`, 'warning');
+    } else {
+      showNotification(`❌ Upload failed: ${error.message}`, 'error');
+    }
+    
+    // Return file names as fallback for logging purposes
+    return Array.from(files).map(file => `[NOT_UPLOADED] ${file.name}`);
   }
 }
 
