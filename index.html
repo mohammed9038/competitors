@@ -706,11 +706,83 @@
       // translate static SalesRep placeholder
       const repSel = document.getElementById('salesRep');
       if(repSel&&repSel.options.length) repSel.options[0].textContent = t.selectPlaceholder;
+      
+      // Translate all existing entries
+      translateAllExistingEntries(t);
     }
 
     function fillSelect(sel, arr) {
       sel.innerHTML = `<option value="" disabled selected>${translations[currentLang].selectPlaceholder}</option>`
                     + arr.map(v=>`<option>${v}</option>`).join('');
+    }
+    
+    function translateAllExistingEntries(t) {
+      // Translate all existing product entries
+      const existingEntries = document.querySelectorAll('#entries .entry');
+      existingEntries.forEach(entry => {
+        // Translate entry header
+        const entryHeader = entry.querySelector('h2');
+        if(entryHeader) entryHeader.innerHTML = `<i class="fas fa-shopping-basket"></i> ${t.productEntry}`;
+        
+        // Translate all labels using the same mapping system
+        const labelMappings = [
+          { icon: 'fas fa-tag', key: 'classification' },
+          { icon: 'fas fa-building', key: 'supplier' },
+          { icon: 'fas fa-certificate', key: 'brand' },
+          { icon: 'fas fa-star', key: 'compBrand' },
+          { icon: 'fas fa-box', key: 'productName' },
+          { icon: 'fas fa-ruler', key: 'productSize' },
+          { icon: 'fas fa-tasks', key: 'activity' },
+          { icon: 'fas fa-dollar-sign', key: 'price' },
+          { icon: 'fas fa-percentage', key: 'promo' },
+          { icon: 'fas fa-eye', key: 'visibility' },
+          { icon: 'fas fa-layer-group', key: 'facing' },
+          { icon: 'fas fa-camera', key: 'images' }
+        ];
+        
+        entry.querySelectorAll('.form-group').forEach((group, index) => {
+          const label = group.querySelector('label');
+          const mapping = labelMappings[index];
+          if (label && mapping && t.labels[mapping.key]) {
+            label.innerHTML = `<i class="${mapping.icon}"></i> ${t.labels[mapping.key]}`;
+          }
+        });
+        
+        // Translate placeholders in existing entries
+        const compBrandSelect = entry.querySelector('select[name="compBrand"]');
+        if(compBrandSelect && compBrandSelect.options[0]) {
+          compBrandSelect.options[0].textContent = t.optionalPlaceholder;
+        }
+        
+        // Translate classification and visibility options
+        const classificationSelect = entry.querySelector('select[name="classification"]');
+        if(classificationSelect && classificationSelect.options.length > 1) {
+          classificationSelect.innerHTML = `<option value="" disabled selected>${t.selectPlaceholder}</option>`
+                        + translations.en.options.classification
+                            .map((eng,i)=>
+                               `<option value="${eng}">${t.options.classification[i]}</option>`
+                            ).join('');
+        }
+        
+        const visibilitySelect = entry.querySelector('select[name="visibility"]');
+        if(visibilitySelect && visibilitySelect.options.length > 1) {
+          visibilitySelect.innerHTML = `<option value="" disabled selected>${t.selectPlaceholder}</option>`
+                        + translations.en.options.visibility
+                            .map((eng,i)=>
+                               `<option value="${eng}">${t.options.visibility[i]}</option>`
+                            ).join('');
+        }
+        
+        // Translate activity select placeholder
+        const activitySelect = entry.querySelector('select[name="activity"]');
+        if(activitySelect && activitySelect.options.length > 0) {
+          fillSelect(activitySelect, activityData.map(r => r.Activity));
+        }
+        
+        // Translate remove button
+        const removeBtn = entry.querySelector('.remove-entry');
+        if(removeBtn) removeBtn.innerHTML = `<i class="fas fa-trash me-2"></i>${t.remove}`;
+      });
     }
 
     // Global variables for entry management
